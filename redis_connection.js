@@ -30,7 +30,8 @@ app.get('/data', async (req, res) => {
         const keys = await client.keys("*random*");
         const jdata = await Promise.all(keys.map((id) => client.get(id)));
         const data = await Promise.all(jdata.map(item => JSON.parse(item)[0]));
-        res.json({ data });
+        const arrdata= await client.get("dataar");
+        res.json({ data,arrdata });
     } catch (err) {
         console.error('Error fetching from Redis:', err);
         res.status(500).send('Server error');
