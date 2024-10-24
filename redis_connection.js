@@ -2,12 +2,22 @@ import { createClient } from 'redis';
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+let userIp;
+
+fetch('https://api.ipify.org?format=json')
+    .then(response => response.json())
+    .then(data => {
+        userIp = data.ip;
+    })
+    .catch(error => {
+        console.error("Error fetching IP address:", error);
+    });
 
 const client = createClient({
     password: process.env.REDIS_PASSWORD,
@@ -18,19 +28,19 @@ const client = createClient({
 });
 
 client.on('error', (err) => console.log('Redis Client Error', err));
-
-// Connect to Redis
 (async () => {
     await client.connect();
     console.log('Connected to Redis');
 })();
 
+
+
 app.get('/data', async (req, res) => {
     try {
-        const keys = await client.keys("*random*");
+        const keys = await client.keys("*"+userIp+"#random*");
         const jdata = await Promise.all(keys.map((id) => client.get(id)));
         const data = await Promise.all(jdata.map(item => JSON.parse(item)[0]));
-        const arrdata= await client.get("dataarr");
+        const arrdata= await client.get(userIp+"#dataarr");
         const jarrdata= await JSON.parse(arrdata);
         res.json({ data,jarrdata });
     } catch (err) {
@@ -39,11 +49,22 @@ app.get('/data', async (req, res) => {
     }
 });
 
-// Use the PORT environment variable or default to port 3001
+app.get('/datamap', async (req, res) => {
+    try {
+        const keys = await client.keys("*"+userIp+"#maprandom*");
+        const jdata = await Promise.all(keys.map((id) => client.get(id)));
+        const data = await Promise.all(jdata.map(item => JSON.parse(item)[0]));
+        const arrdata= await client.get(userIp+"#dataarrmap");
+        const jarrdata= await JSON.parse(arrdata);
+        res.json({ data,jarrdata });
+    } catch (err) {
+        console.error('Error fetching from Redis:', err);
+        res.status(500).send('Server error');
+    }
+});
+
 const PORT = 6379;
 app.listen(PORT, () => {
     console.log(`redis running on port ${PORT}`);
 });
-
-// Export the app for use in index.js
-export default app; // הוספת שורה זו
+export default app; 
