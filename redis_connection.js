@@ -39,8 +39,8 @@ app.get('/data', async (req, res) => {
     try {
         const userIp = req.headers['x-forwarded-for'];
         const keys = await client.keys(userIp+"#random*");
-        const jdata = await Promise.all(keys.map(item => client.get(item)[0]));
-        const data = await Promise.all(jdata.map((id) => JSON.parse(id)));
+        const jdata = await Promise.all(keys.map((id) => client.get(id)));
+        const data = await Promise.all(jdata.map(item => JSON.parse(item)[0]));
         const arrdata= await client.get(userIp+"#dataarr");
         const jarrdata= await JSON.parse(arrdata);
         res.json({ data, jarrdata });
