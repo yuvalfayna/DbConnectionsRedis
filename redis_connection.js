@@ -38,6 +38,7 @@ client.on('error', (err) => console.log('Redis Client Error', err));
 app.get('/data', async (req, res) => {
     try {
         const keys = await client.keys(userIp+"#random*");
+        console.log(userIp+"#random*");
         console.log(keys);
         const jdata = await Promise.all(keys.map((id) => client.get(id)));
         console.log(jdata);
