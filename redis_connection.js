@@ -1,3 +1,5 @@
+// שירות האחראי על יצירת וניהול החיבור של צד הלקוח עם הרדיס
+
 import { createClient } from 'redis';
 import express from 'express';
 import cors from 'cors';
@@ -19,6 +21,7 @@ fetch('https://api.ipify.org?format=json')
         console.error("Error fetching IP address:", error);
     });
 
+// יצירת חיבור עם הרדיס
 const client = createClient({
     password: process.env.REDIS_PASSWORD,
     socket: {
@@ -34,7 +37,7 @@ client.on('error', (err) => console.log('Redis Client Error', err));
 })();
 
 
-
+// הגדרת נקודת קצה השולפת את המידע מהרדיס ומנגישה אותו ללקוח בדף הגרף
 app.get('/data', async (req, res) => {
     try {
         const userIp = req.headers['x-forwarded-for'];
@@ -50,6 +53,7 @@ app.get('/data', async (req, res) => {
     }
 });
 
+// הגדרת נקודת קצה השולפת את המידע מהרדיס ומנגישה אותו ללקוח בדף המפה
 app.get('/datamap', async (req, res) => {
     try {
         const userIp = req.headers['x-forwarded-for'];
