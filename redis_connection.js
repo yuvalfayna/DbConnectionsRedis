@@ -41,9 +41,8 @@ client.on('error', (err) => console.log('Redis Client Error', err));
 app.get('/data', async (req, res) => {
     try {
         const userIp = req.headers['x-forwarded-for'];
-        const keys = await client.keys(userIp+"#random*");
-        const jdata = await Promise.all(keys.map((id) => client.get(id)));
-        const data = await Promise.all(jdata.map(item => JSON.parse(item)[0]));
+        const jdata = await client.get(userIp+"#random");
+        const data = await JSON.parse(jdata);
         const arrdata= await client.get(userIp+"#dataarr");
         const jarrdata= await JSON.parse(arrdata);
         res.json({ data, jarrdata });
@@ -57,9 +56,8 @@ app.get('/data', async (req, res) => {
 app.get('/datamap', async (req, res) => {
     try {
         const userIp = req.headers['x-forwarded-for'];
-        const keys = await client.keys(userIp+"#maprandom*");
-        const jdata = await Promise.all(keys.map((id) => client.get(id)));
-        const data = await Promise.all(jdata.map(item => JSON.parse(item)[0]));
+        const jdata = await client.get(userIp+"#maprandom");
+        const data = await JSON.parse(jdata);
         const arrdata= await client.get(userIp+"#dataarrmap");
         const jarrdata= await JSON.parse(arrdata);
         res.json({ data,jarrdata });
